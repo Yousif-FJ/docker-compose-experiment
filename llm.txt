@@ -1,0 +1,9 @@
+# The used LLM tool
+https://copilot.microsoft.com with TUNI account
+
+# General motive for using LLM:
+I myself not a fan of LLM and their usage however in some cases normal search just won't show the results I'm looking for.
+
+# Cases where LLM used:
+- Help figure out certain commands like : npx gitignore node
+- Help generate template for node
