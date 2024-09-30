@@ -7,3 +7,4 @@ I myself not a fan of LLM and their usage however in some cases normal search ju
 # Cases where LLM used:
 - Help figure out certain commands like : npx gitignore node
 - Help generate template for node
+- Help figure out the docker file for Node

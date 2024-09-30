@@ -3,7 +3,7 @@ services:
     build:
       context: ./service-1
     ports:
-      - "8081:8080"
+      - "8199:8080"
     depends_on:
       service-2:
         condition: service_started
