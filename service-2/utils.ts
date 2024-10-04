@@ -22,7 +22,7 @@ export async function getSystemInformation() {
 
 
     const result : SystemInformation = {
-        FreeSpace : humanFileSize(totalFreeSpace),
+        FreeSpace : totalFreeSpace.toString(),
         Ips : [ip],
         Uptime : uptime,
         Processes : processes
@@ -76,9 +76,4 @@ function getTotalFreeSpace(): Promise<number> {
             resolve(stats.bsize * stats.bfree);
         })
     })   
-}
-
-function humanFileSize(size : number) {
-    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-    return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
