@@ -1,12 +1,14 @@
 import { createServer } from 'http';
+import { getSystemInformation } from './utils.js';
 
-const server = createServer((req, res) => {
+const server = createServer(async (req, res) => {
   res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello, World!\n');
+  res.setHeader('Content-Type', 'application/json');
+  res.end(await getSystemInformation());
 });
 
 const PORT = 3000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}/`);
+  console.log(await getSystemInformation());
 });
