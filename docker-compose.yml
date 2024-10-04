@@ -1,7 +1,10 @@
+name: devops-compose-experiment
 services:
   service-1:
     build:
       context: ./service-1
+    image: "devops-service-1"
+    container_name: devops-service-1
     ports:
       - "8199:8080"
     depends_on:
@@ -11,3 +14,5 @@ services:
   service-2:
     build:
       context: ./service-2
+    image: "devops-service-2"
+    container_name: devops-service-2
