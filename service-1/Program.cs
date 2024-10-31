@@ -1,12 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using service_1;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 
+const string RateLimiterPolicyName = "RateLimiter";
+
+builder.Services.AddRateLimiter(config => 
+    config.AddFixedWindowLimiter(RateLimiterPolicyName, option => { 
+        option.PermitLimit = 1;
+        option.QueueLimit = 100;
+        option.Window = TimeSpan.FromSeconds(2);
+        option.AutoReplenishment = true;
+    }));
+
 var app = builder.Build();
 
+app.UseRateLimiter();
 
 app.MapGet("/", async ([FromServices] IHttpClientFactory httpClientFactory,
                         ILogger<Program> logger) =>
@@ -36,6 +48,7 @@ app.MapGet("/", async ([FromServices] IHttpClientFactory httpClientFactory,
         logger.LogError(message: "Error while requesting service_2", exception: e);
         return Results.Problem("failed to get response from the service-2");
     }
-});
+})
+.RequireRateLimiting(RateLimiterPolicyName);
 
 app.Run();
