@@ -6,6 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Hello world</h1>
+    <textarea style="display: block;" rows="7" cols="70" id="textArea"></textarea>
+    <button onclick="fetchInfo()">Request</button>
+    <script>
+        async function fetchInfo() {
+            const response = await fetch("/server-info");
+            const data =  await response.text();
+            const textArea = document.getElementById("textArea");
+            textArea.value = data
+        }
+    </script>
 </body>
 </html>
