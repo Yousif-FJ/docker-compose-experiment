@@ -1,0 +1,9 @@
+stages:
+  - test
+
+test:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - apt-get update && apt-get install -y docker-compose
+    - dotnet test
