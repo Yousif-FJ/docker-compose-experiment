@@ -4,6 +4,7 @@ services:
   - docker:dind
 test:
   stage: test
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: docker/compose:27.4.1
   script:
+    - sudo apk add dotnet8-sdk
     - dotnet test
