@@ -1,9 +1,14 @@
 stages:
   - test
+  
 services:
   - docker:27.4.1-dind
+
 before_script:
+  - apt-get update
+  - apt-get install -y docker-compose
   - docker info
+
 test:
   stage: test
   image: docker:27.4.1
