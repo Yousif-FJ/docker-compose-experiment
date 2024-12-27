@@ -1,6 +1,10 @@
 test:
   stage: test
   image: docker:27.4.1
+
+  services:
+    - docker:27.4.1-dind
+
   script:
     - docker info
     - apk add dotnet8-sdk
