@@ -2,6 +2,7 @@ test:
   stage: test
   image: docker:27.4.1
   script:
+    - docker info
     - apk add dotnet8-sdk
     - docker-compose up -d
     - dotnet test
