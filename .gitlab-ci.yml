@@ -2,6 +2,6 @@ test:
   stage: test
   image: docker:27.4.1
   script:
-    - sudo apk add dotnet8-sdk
+    - apk add dotnet8-sdk
     - docker-compose up -d
     - dotnet test
