@@ -1,3 +1,6 @@
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
 test:
   stage: test
   image: docker:27.4.1
