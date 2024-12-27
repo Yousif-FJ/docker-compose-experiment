@@ -1,16 +1,7 @@
-stages:
-  - test
-
-services:
-  - name: docker:27.4.1-dind
-    alias: docker
-
-before_script:
-  - docker info
-
 test:
   stage: test
   image: docker:27.4.1
   script:
     - sudo apk add dotnet8-sdk
+    - docker-compose up -d
     - dotnet test
