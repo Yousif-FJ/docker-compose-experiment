@@ -80,4 +80,23 @@ public class Tests
 
         Assert.IsTrue(response.IsSuccessStatusCode);
     }
+
+    
+    [TestMethod]
+    public async Task MakeGetState_ToApi_ShouldReturnOkayInitial()
+    {
+        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
+
+        var httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri($"http://{serviceHost}:8197/")
+        };
+
+        var response = await httpClient.GetAsync("/state");
+
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
+        Assert.IsTrue(response.IsSuccessStatusCode);
+        Assert.IsTrue((await response.Content.ReadAsStringAsync()) == "INIT");
+    }
 }
