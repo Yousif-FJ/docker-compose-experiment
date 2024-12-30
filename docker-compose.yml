@@ -10,10 +10,20 @@ services:
       service-1-1:
         condition: service_started
 
+  db:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+
   service-1-1:
     build:
       context: ./service-1
     depends_on:
+      db:
+        condition: service_started
       service-2:
         condition: service_started
 
@@ -21,6 +31,8 @@ services:
     build:
       context: ./service-1
     depends_on:
+      db:
+        condition: service_started
       service-2:
         condition: service_started
 
@@ -28,9 +40,14 @@ services:
     build:
       context: ./service-1
     depends_on:
+      db:
+        condition: service_started
       service-2:
         condition: service_started
 
   service-2:
     build:
       context: ./service-2
+
+volumes:
+  mongo-data:

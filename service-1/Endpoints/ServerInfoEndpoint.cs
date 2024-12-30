@@ -8,10 +8,10 @@ internal static class ServerInfoEndpoint
 {
     public static RouteHandlerBuilder MapServerInfoEndpoint(this WebApplication app)
     {
-        return app.Map("/request", GetServerInfo);
+        return app.MapGet("/request", GetServerInfoHandler);
     }
 
-    public static async Task<IResult> GetServerInfo(IHttpClientFactory httpClientFactory,
+    public static async Task<IResult> GetServerInfoHandler(IHttpClientFactory httpClientFactory,
         ILogger<Program> logger)
     {
         using var httpClient = httpClientFactory.CreateClient();
