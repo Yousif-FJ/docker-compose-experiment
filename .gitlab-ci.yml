@@ -1,5 +1,6 @@
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
+  CICD_APP_SERVICE_HOSTNAME: "docker"
 
 test:
   stage: test
