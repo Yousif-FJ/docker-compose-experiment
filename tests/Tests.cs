@@ -35,6 +35,8 @@ public class Tests
 
         var response = await httpClient.GetAsync("/request");
 
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
         Assert.IsTrue(response.IsSuccessStatusCode);
     }
 }

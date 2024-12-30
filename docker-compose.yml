@@ -5,6 +5,7 @@ services:
       context: ./nginx
     ports:
       - "8198:8198"
+      - "8197:8197"
     depends_on:
       service-1-1:
         condition: service_started
