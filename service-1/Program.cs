@@ -21,7 +21,13 @@ var app = builder.Build();
 
 app.UseRateLimiter();
 
+
+//My endpoints:
 app.MapServerInfoEndpoint()
     .RequireRateLimiting(RateLimiterPolicyName);
+    
+app.MapLoginEndpoint();
+
+
 
 app.Run();

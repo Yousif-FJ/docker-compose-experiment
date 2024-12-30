@@ -9,6 +9,7 @@
     <textarea style="display: block;" rows="7" cols="70" id="textArea"></textarea>
     <button onclick="fetchInfo()">Request</button>
     <script>
+        fetch("/login", { method: "POST" })
         async function fetchInfo() {
             const response = await fetch("/server-info");
             const data =  await response.text();
