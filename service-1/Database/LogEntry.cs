@@ -7,7 +7,11 @@ public class LogEntry
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public int Id { get; set; }
+    public string? Id { get; set; }
     public DateTime DateTime { get; set; }
     public string? Description { get; set; }
+    public override string ToString()
+    {
+        return $"{DateTime}: {Description}";
+    }
 }

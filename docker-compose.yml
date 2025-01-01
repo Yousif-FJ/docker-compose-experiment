@@ -15,8 +15,6 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
-    volumes:
-      - mongo-data:/data/db
 
   service-1-1:
     build:
@@ -48,6 +46,3 @@ services:
   service-2:
     build:
       context: ./service-2
-
-volumes:
-  mongo-data:

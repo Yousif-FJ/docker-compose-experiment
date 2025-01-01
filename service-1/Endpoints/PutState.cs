@@ -17,41 +17,48 @@ internal static class PutState
         HttpRequest request,
         [FromServices] IOptions<DbConfig> dbConfig)
     {
-        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
+        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
 
-        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
 
-        string? newState = null;
+        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+
+        var currentStateEntry = await stateCollection.Find(_ => true).FirstOrDefaultAsync() ??
+            new State(){ CurrentAppState = AppState.INIT};
+
+        AppState newState;
         try
         {
             using var streamReader = new StreamReader(request.Body, Encoding.UTF8);
-            newState = await streamReader.ReadToEndAsync();
+            var newStateString = await streamReader.ReadToEndAsync();
+            if (!Enum.TryParse(newStateString, out newState))
+            {
+                return Results.BadRequest("Invalid state parameter");
+            }
         }
         catch
         {
             return Results.BadRequest("Invalid state parameter");
         }
 
-        if (!Enum.TryParse(newState, out AppState newAppState))
-        {
-            return Results.BadRequest("Invalid state parameter");
-        }
 
-        if (newAppState == AppState.SHUTDOWN)
+        if (newState == AppState.SHUTDOWN)
         {
             return Results.Problem("Shutdown is not implemented", statusCode: 501);
         }
 
-        if (currentState is null)
-        {
-            currentState = new State() { CurrentAppState = newAppState };
-            await stateCollection.InsertOneAsync(currentState);
-        }
-        else
-        {
-            currentState.CurrentAppState = newAppState;
-            await stateCollection.ReplaceOneAsync(x => x.Id == currentState.Id, currentState);
-        }
+        var LogEntry = new LogEntry
+        { 
+            DateTime = DateTime.UtcNow,
+            Description = $"{currentStateEntry.CurrentAppState}->{newState}"
+        };
+
+        currentStateEntry.CurrentAppState = newState;
+        await stateCollection.ReplaceOneAsync(_ => true, currentStateEntry);
+        
+        var runLogCollection = myDb.GetCollection<LogEntry>(dbConfig.Value.LogEntryCollectionName);
+        await runLogCollection.InsertOneAsync(LogEntry);
+
         return Results.Ok();
     }
 }

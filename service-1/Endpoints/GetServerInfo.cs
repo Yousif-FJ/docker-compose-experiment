@@ -17,8 +17,8 @@ internal static class ServerInfoEndpoint
 
     public static async Task<IResult> GetServerInfoHandler(
         [FromServices] IOptions<DbConfig> dbConfig,
-        IHttpClientFactory httpClientFactory,
-        ILogger<Program> logger)
+        [FromServices] IHttpClientFactory httpClientFactory,
+        [FromServices] ILogger<Program> logger)
     {
         var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
         
