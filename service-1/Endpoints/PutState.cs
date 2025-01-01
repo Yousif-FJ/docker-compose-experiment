@@ -37,6 +37,11 @@ internal static class PutState
             return Results.BadRequest("Invalid state parameter");
         }
 
+        if (newAppState == AppState.SHUTDOWN)
+        {
+            return Results.Problem("Shutdown is not implemented", statusCode: 501);
+        }
+
         if (currentState is null)
         {
             currentState = new State() { CurrentAppState = newAppState };

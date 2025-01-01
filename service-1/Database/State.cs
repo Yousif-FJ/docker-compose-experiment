@@ -9,5 +9,6 @@ public enum AppState
 {
     INIT, 
     PAUSED,
-    RUNNING
+    RUNNING,
+    SHUTDOWN
 }
