@@ -33,18 +33,27 @@ internal static class PutState
             var newStateString = await streamReader.ReadToEndAsync();
             if (!Enum.TryParse(newStateString, out newState))
             {
-                return Results.BadRequest("Invalid state parameter");
+                return Results.Text("Invalid state parameter", statusCode: 400);
             }
         }
         catch
         {
-            return Results.BadRequest("Invalid state parameter");
+            return Results.Text("Invalid state parameter", statusCode: 400);
         }
 
+        if (currentStateEntry.CurrentAppState == newState)
+        {
+            return Results.Text(newState.ToString(), statusCode: 200);
+        }
+
+        if (currentStateEntry.CurrentAppState == AppState.INIT)
+        {
+            return Results.Text("Cannot change state from INIT without Login", statusCode: 400);
+        }
 
         if (newState == AppState.SHUTDOWN)
         {
-            return Results.Problem("Shutdown is not implemented", statusCode: 501);
+            return Results.Text("Shutdown is not implemented", statusCode: 501);
         }
 
         var LogEntry = new LogEntry
@@ -59,6 +68,6 @@ internal static class PutState
         var runLogCollection = myDb.GetCollection<LogEntry>(dbConfig.Value.LogEntryCollectionName);
         await runLogCollection.InsertOneAsync(LogEntry);
 
-        return Results.Ok();
+        return Results.Text(newState.ToString(), statusCode: 200);
     }
 }

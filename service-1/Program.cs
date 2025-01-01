@@ -29,6 +29,7 @@ app.MapServerInfoEndpoint()
 app.MapLoginEndpoint();
 app.MapGetStateEndpoint();
 app.MapPutState();
+app.MapGetRunLog();
 
 
 app.Run();

@@ -14,20 +14,30 @@ internal static class LoginEndpoint
 
     public static async Task<IResult> ChangeStateToLoggedIn([FromServices] IOptions<DbConfig> dbConfig)
     {
-        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
+        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
 
-        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
 
-        if (currentState is null)
-        {
-            currentState = new State() { CurrentAppState = AppState.RUNNING };
-            await stateCollection.InsertOneAsync(currentState);
-        }
-        else
-        {
-            currentState.CurrentAppState = AppState.RUNNING;
-            await stateCollection.ReplaceOneAsync(_ => true, currentState);
-        }
+        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+
+        var currentStateEntry = await stateCollection.Find(_ => true).FirstOrDefaultAsync() ??
+            new State(){ CurrentAppState = AppState.INIT};
+
+
+        var newState = AppState.RUNNING;
+
+        var LogEntry = new LogEntry
+        { 
+            DateTime = DateTime.UtcNow,
+            Description = $"{currentStateEntry.CurrentAppState}->{newState}"
+        };
+
+        currentStateEntry.CurrentAppState = newState;
+        await stateCollection.ReplaceOneAsync(_ => true, currentStateEntry);
+        
+        var runLogCollection = myDb.GetCollection<LogEntry>(dbConfig.Value.LogEntryCollectionName);
+        await runLogCollection.InsertOneAsync(LogEntry);
+
         return Results.Ok();
     }
 }

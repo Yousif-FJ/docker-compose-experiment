@@ -12,6 +12,6 @@ public class LogEntry
     public string? Description { get; set; }
     public override string ToString()
     {
-        return $"{DateTime}: {Description}";
+        return $"{DateTime:O}: {Description}";
     }
 }

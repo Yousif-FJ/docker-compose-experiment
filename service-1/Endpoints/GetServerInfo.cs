@@ -26,7 +26,7 @@ internal static class ServerInfoEndpoint
         
         if (currentState.CurrentAppState == AppState.PAUSED)
         {
-            return Results.Problem(statusCode: 503);
+            return Results.Text("Service is PAUSED",statusCode: 503);
         }
 
         using var httpClient = httpClientFactory.CreateClient();
@@ -45,14 +45,21 @@ internal static class ServerInfoEndpoint
                 throw new Exception($"Unexpected response from service 2, Response was : {result}");
             }
 
-            SystemInformation[] resultArray = [systemInfo1, systemInfo2];
+            var resultTest =  
+            $"""
+            System Info 1: 
+            {systemInfo1}
 
-            return Results.Ok(resultArray);
+            System Info 2:
+            {systemInfo2}
+            """;
+
+            return Results.Text(resultTest);
         }
         catch (Exception e)
         {
             logger.LogError(message: "Error while requesting service_2", exception: e);
-            return Results.Problem("failed to get response from the service-2");
+            return Results.Text("failed to get response from the service-2", statusCode: 500);
         }
     }
 }
@@ -82,4 +89,16 @@ public static class Utils
     }
 }
 
-public record SystemInformation(List<string> Ips, List<string> Processes, string Uptime, string FreeSpace);
+public record SystemInformation(List<string> Ips, List<string> Processes, string Uptime, string FreeSpace)
+{
+    public override string ToString()
+    {
+        return 
+        $"""
+        IP: {string.Join(", ", Ips)}
+        Processes: {string.Join(", ", Processes)}
+        Uptime: {Uptime}
+        FreeSpace: {FreeSpace}
+        """;
+    }
+};
