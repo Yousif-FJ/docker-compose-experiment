@@ -28,6 +28,7 @@ app.MapServerInfoEndpoint()
     .RequireRateLimiting(RateLimiterPolicyName);
 app.MapLoginEndpoint();
 app.MapGetStateEndpoint();
+app.MapPutState();
 
 
 app.Run();
