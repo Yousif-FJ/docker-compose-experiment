@@ -79,4 +79,36 @@ public class StatefulSystemTests
         Assert.IsTrue(response.IsSuccessStatusCode);
     }
 
+
+    [TestMethod]
+    [TestProperty("ExecutionOrder", "5")]
+    public async Task PostStatePaused_ToApi_ShouldReturnOkay()
+    {
+        var httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri($"http://{serviceHost}:8197/")
+        };
+
+        var response = await httpClient.PutAsync("/state", new StringContent("PAUSED"));
+
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
+        Assert.IsTrue(response.IsSuccessStatusCode);
+    }
+
+    [TestMethod]
+    [TestProperty("ExecutionOrder", "6")]
+    public async Task GetRequest_ToApi_ShouldReturn503_WhenSystemIsPaused()
+    {
+        var httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri($"http://{serviceHost}:8197/")
+        };
+
+        var response = await httpClient.GetAsync("/request");
+
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
+        Assert.IsTrue(response.StatusCode == HttpStatusCode.ServiceUnavailable);
+    }   
 }
