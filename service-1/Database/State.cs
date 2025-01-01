@@ -7,7 +7,7 @@ public class State{
 
 public enum AppState
 {
-    Init, 
-    Paused,
-    Running
+    INIT, 
+    PAUSED,
+    RUNNING
 }

@@ -25,12 +25,12 @@ internal static class LoginEndpoint
 
         if (currentState is null)
         {
-            currentState = new State() { CurrentAppState = AppState.Running };
+            currentState = new State() { CurrentAppState = AppState.RUNNING };
             await stateCollection.InsertOneAsync(currentState);
         }
         else
         {
-            currentState.CurrentAppState = AppState.Running;
+            currentState.CurrentAppState = AppState.RUNNING;
             await stateCollection.ReplaceOneAsync(x => x.Id == currentState.Id, currentState);
         }
         return Results.Ok();

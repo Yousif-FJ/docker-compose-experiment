@@ -8,13 +8,29 @@ namespace tests;
 public class StatefulSystemTests
 {
     public TestContext TestContext { get; set; } = default!;
+    private readonly string serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
+
+    [TestMethod]
+    [TestProperty("ExecutionOrder", "1")]
+    public async Task PostStateInit_ToApi_ShouldReturnOkay()
+    {
+        var httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri($"http://{serviceHost}:8197/")
+        };
+
+        var response = await httpClient.PutAsync("/state", new StringContent("INIT"));
+
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
+        Assert.IsTrue(response.IsSuccessStatusCode);
+    }
 
 
     [TestMethod]
+    [TestProperty("ExecutionOrder", "2")]
     public async Task GetState_ToApi_ShouldReturnOkayInitial_WhenSystemInInitState()
     {
-        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
         var httpClient = new HttpClient()
         {
             BaseAddress = new Uri($"http://{serviceHost}:8197/")
@@ -29,27 +45,9 @@ public class StatefulSystemTests
     }
 
     [TestMethod]
-    public async Task GetRequest_ToApi_ShouldReturnOkay_WhenSystemIsRunning()
-    {
-        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
-        var httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri($"http://{serviceHost}:8197/")
-        };
-
-        var response = await httpClient.GetAsync("/request");
-
-        TestContext.WriteLine($"Response: {response.StatusCode}");
-
-        Assert.IsTrue(response.IsSuccessStatusCode);
-    }
-
-    [TestMethod]
+    [TestProperty("ExecutionOrder", "3")]
     public async Task PostLogin_ToMainPagePort_ShouldReturnOkay()
     {
-        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
         var httpClient = new HttpClient()
         {
             BaseAddress = new Uri($"http://{serviceHost}:8198/")
@@ -64,4 +62,21 @@ public class StatefulSystemTests
 
         Assert.IsTrue(response.IsSuccessStatusCode);
     }
+
+    [TestMethod]
+    [TestProperty("ExecutionOrder", "4")]
+    public async Task GetRequest_ToApi_ShouldReturnOkay_WhenSystemIsRunning()
+    {
+        var httpClient = new HttpClient()
+        {
+            BaseAddress = new Uri($"http://{serviceHost}:8197/")
+        };
+
+        var response = await httpClient.GetAsync("/request");
+
+        TestContext.WriteLine($"Response: {response.StatusCode}");
+
+        Assert.IsTrue(response.IsSuccessStatusCode);
+    }
+
 }

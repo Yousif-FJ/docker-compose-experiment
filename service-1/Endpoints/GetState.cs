@@ -20,8 +20,8 @@ internal static class GetState
         var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
 
         var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync()
-             ?? new State{ CurrentAppState = AppState.Init };
+             ?? new State{ CurrentAppState = AppState.INIT };
          
-        return Results.Text(content: currentState.CurrentAppState.ToString().ToUpper(),  statusCode: 200);
+        return Results.Text(content: currentState.CurrentAppState.ToString(),  statusCode: 200);
     }
 }

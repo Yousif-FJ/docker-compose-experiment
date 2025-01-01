@@ -8,12 +8,11 @@ namespace tests;
 public class StatelessSystemTest
 {
     public TestContext TestContext { get; set; } = default!;
+    private readonly string serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
 
     [TestMethod]
     public async Task PostLoginRequest_ToApiPort_ShouldReturnForbidden()
     {
-        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
         var httpClient = new HttpClient()
         {
             BaseAddress = new Uri($"http://{serviceHost}:8197/")
@@ -29,8 +28,6 @@ public class StatelessSystemTest
     [TestMethod]
     public async Task GetRequestWithAuthentication_ToRootPage_ShouldReturnOkay()
     {
-        var serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
         var httpClient = new HttpClient()
         {
             BaseAddress = new Uri($"http://{serviceHost}:8198/")
