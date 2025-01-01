@@ -22,7 +22,8 @@ internal static class ServerInfoEndpoint
     {
         var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
         
-        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync()??
+            new State{ CurrentAppState = AppState.INIT};
         
         if (currentState.CurrentAppState == AppState.PAUSED)
         {

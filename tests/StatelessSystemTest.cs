@@ -3,14 +3,12 @@ using System.Text;
 
 namespace tests;
 
-[TestClass]
 //Tests which always return the same results regardless of the system state
 public class StatelessSystemTest
 {
-    public TestContext TestContext { get; set; } = default!;
     private readonly string serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
 
-    [TestMethod]
+    [Test]
     public async Task PostLoginRequest_ToApiPort_ShouldReturnForbidden()
     {
         var httpClient = new HttpClient()
@@ -20,12 +18,12 @@ public class StatelessSystemTest
 
         var response = await httpClient.PostAsync("/login", null);
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        Console.WriteLine($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.StatusCode == HttpStatusCode.Forbidden);
+        await Assert.That(response.StatusCode == HttpStatusCode.Forbidden).IsTrue();
     }
 
-    [TestMethod]
+    [Test]
     public async Task GetRequestWithAuthentication_ToRootPage_ShouldReturnOkay()
     {
         var httpClient = new HttpClient()
@@ -37,8 +35,8 @@ public class StatelessSystemTest
 
         var response = await httpClient.GetAsync("/");
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        Console.WriteLine($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
     }
 }

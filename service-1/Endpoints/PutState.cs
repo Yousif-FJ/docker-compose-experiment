@@ -15,7 +15,8 @@ internal static class PutState
 
     public static async Task<IResult> PutStateHandler(
         HttpRequest request,
-        [FromServices] IOptions<DbConfig> dbConfig)
+        [FromServices] IOptions<DbConfig> dbConfig,
+        [FromServices] ILogger<Program> logger)
     {
         var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
 
@@ -23,8 +24,13 @@ internal static class PutState
 
         var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
 
-        var currentStateEntry = await stateCollection.Find(_ => true).FirstOrDefaultAsync() ??
-            new State(){ CurrentAppState = AppState.INIT};
+        var currentStateEntry = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+
+        if (currentStateEntry is null)
+        {
+            currentStateEntry = new State(){ CurrentAppState = AppState.INIT};
+            await stateCollection.InsertOneAsync(currentStateEntry);
+        }
 
         AppState newState;
         try
@@ -63,8 +69,10 @@ internal static class PutState
         };
 
         currentStateEntry.CurrentAppState = newState;
-        await stateCollection.ReplaceOneAsync(_ => true, currentStateEntry);
+        var result = await stateCollection.ReplaceOneAsync(_ => true, currentStateEntry);
         
+        logger.LogInformation("Updated state, ModifiedCount: {ModifiedCount}", result.ModifiedCount);
+
         var runLogCollection = myDb.GetCollection<LogEntry>(dbConfig.Value.LogEntryCollectionName);
         await runLogCollection.InsertOneAsync(LogEntry);
 

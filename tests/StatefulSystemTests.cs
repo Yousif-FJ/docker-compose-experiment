@@ -1,17 +1,15 @@
 using System.Net;
 using System.Text;
+using TUnit.Core.Logging;
 
 namespace tests;
 
-[TestClass]
 //Test which are effected or effect system state
 public class StatefulSystemTests
 {
-    public TestContext TestContext { get; set; } = default!;
     private readonly string serviceHost = Environment.GetEnvironmentVariable("CICD_APP_SERVICE_HOSTNAME") ?? "localhost";
-
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "1")]
+    private readonly DefaultLogger logger = new();
+    [Test]
     public async Task PostStateInit_ToApi_ShouldReturnOkay()
     {
         var httpClient = new HttpClient()
@@ -21,14 +19,14 @@ public class StatefulSystemTests
 
         var response = await httpClient.PutAsync("/state", new StringContent("INIT"));
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
     }
 
 
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "2")]
+    [Test]
+    [DependsOn(nameof(PostStateInit_ToApi_ShouldReturnOkay))]
     public async Task GetState_ToApi_ShouldReturnOkayInitial_WhenSystemInInitState()
     {
         var httpClient = new HttpClient()
@@ -38,14 +36,14 @@ public class StatefulSystemTests
 
         var response = await httpClient.GetAsync("/state");
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
-        Assert.IsTrue((await response.Content.ReadAsStringAsync()) == "INIT");
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        Assert.Equals(await response.Content.ReadAsStringAsync(), "INIT");
     }
 
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "3")]
+    [Test]
+    [DependsOn(nameof(GetState_ToApi_ShouldReturnOkayInitial_WhenSystemInInitState))]
     public async Task PostLogin_ToMainPagePort_ShouldReturnOkay()
     {
         var httpClient = new HttpClient()
@@ -58,13 +56,13 @@ public class StatefulSystemTests
 
         var response = await httpClient.PostAsync("/login", null);
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
     }
 
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "4")]
+    [Test]
+    [DependsOn(nameof(PostLogin_ToMainPagePort_ShouldReturnOkay))]
     public async Task GetRequest_ToApi_ShouldReturnOkay_WhenSystemIsRunning()
     {
         var httpClient = new HttpClient()
@@ -74,14 +72,14 @@ public class StatefulSystemTests
 
         var response = await httpClient.GetAsync("/request");
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
     }
 
 
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "5")]
+    [Test]
+    [DependsOn(nameof(GetRequest_ToApi_ShouldReturnOkay_WhenSystemIsRunning))]
     public async Task PostStatePaused_ToApi_ShouldReturnOkay()
     {
         var httpClient = new HttpClient()
@@ -91,13 +89,14 @@ public class StatefulSystemTests
 
         var response = await httpClient.PutAsync("/state", new StringContent("PAUSED"));
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
+        logger.LogInformation($"Body: { await response.Content.ReadAsStringAsync()}");
 
-        Assert.IsTrue(response.IsSuccessStatusCode);
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
     }
 
-    [TestMethod]
-    [TestProperty("ExecutionOrder", "6")]
+    [Test]
+    [DependsOn(nameof(PostStatePaused_ToApi_ShouldReturnOkay))]
     public async Task GetRequest_ToApi_ShouldReturn503_WhenSystemIsPaused()
     {
         var httpClient = new HttpClient()
@@ -107,8 +106,8 @@ public class StatefulSystemTests
 
         var response = await httpClient.GetAsync("/request");
 
-        TestContext.WriteLine($"Response: {response.StatusCode}");
+        logger.LogInformation($"Response: {response.StatusCode}");
 
-        Assert.IsTrue(response.StatusCode == HttpStatusCode.ServiceUnavailable);
+        Assert.Equals(response.StatusCode, HttpStatusCode.ServiceUnavailable);
     }   
 }
