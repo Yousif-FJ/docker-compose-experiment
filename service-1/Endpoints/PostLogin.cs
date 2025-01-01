@@ -1,14 +1,38 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using service_1.Database;
+
 namespace service_1.Endpoints;
 
 internal static class LoginEndpoint
 {
-    public static RouteHandlerBuilder MapLoginEndpoint(this WebApplication app){
+    public static RouteHandlerBuilder MapLoginEndpoint(this WebApplication app)
+    {
         return app.MapPost("/login", ChangeStateToLoggedIn);
     }
 
-    public static async Task<IResult> ChangeStateToLoggedIn(){
-        //TODO implement state
-        
+    public static async Task<IResult> ChangeStateToLoggedIn([FromServices] IOptions<DbConfig> dbConfig)
+    {
+
+        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
+
+        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
+
+        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+
+        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+
+        if (currentState is null)
+        {
+            currentState = new State() { CurrentAppState = AppState.Running };
+            await stateCollection.InsertOneAsync(currentState);
+        }
+        else
+        {
+            currentState.CurrentAppState = AppState.Running;
+            await stateCollection.ReplaceOneAsync(x => x.Id == currentState.Id, currentState);
+        }
         return Results.Ok();
     }
 }
