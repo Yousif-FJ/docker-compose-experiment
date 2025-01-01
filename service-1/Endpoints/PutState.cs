@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using service_1.Database;
 
+namespace service_1.Endpoints;
+
 internal static class PutState
 {
     public static RouteHandlerBuilder MapPutState(this WebApplication app)
@@ -31,9 +33,9 @@ internal static class PutState
             using var streamReader = new StreamReader(request.Body, Encoding.UTF8);
             newState = await streamReader.ReadToEndAsync();
         }
-        catch 
+        catch
         {
-            
+
             return Results.BadRequest("Invalid state parameter");
         }
 
