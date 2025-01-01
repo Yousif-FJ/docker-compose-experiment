@@ -1,8 +1,9 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using service_1.Database;
+
+namespace service_1.Endpoints;
 
 internal static class GetState
 {
@@ -13,15 +14,11 @@ internal static class GetState
 
     public static async Task<IResult> GetStateHandler([FromServices] IOptions<DbConfig> dbConfig)
     {
-        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
-
-        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
-
-        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
 
         var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync()
-             ?? new State{ CurrentAppState = AppState.INIT };
-         
-        return Results.Text(content: currentState.CurrentAppState.ToString(),  statusCode: 200);
+             ?? new State { CurrentAppState = AppState.INIT };
+
+        return Results.Text(content: currentState.CurrentAppState.ToString(), statusCode: 200);
     }
 }

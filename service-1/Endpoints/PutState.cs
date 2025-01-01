@@ -1,5 +1,3 @@
-
-using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -19,11 +17,7 @@ internal static class PutState
         HttpRequest request,
         [FromServices] IOptions<DbConfig> dbConfig)
     {
-        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
-
-        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
-
-        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
 
         var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
 
@@ -35,7 +29,6 @@ internal static class PutState
         }
         catch
         {
-
             return Results.BadRequest("Invalid state parameter");
         }
 

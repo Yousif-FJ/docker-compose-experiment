@@ -14,11 +14,7 @@ internal static class LoginEndpoint
 
     public static async Task<IResult> ChangeStateToLoggedIn([FromServices] IOptions<DbConfig> dbConfig)
     {
-        var mongoClient = new MongoClient(dbConfig.Value.ConnectionString);
-
-        var myDb = mongoClient.GetDatabase(dbConfig.Value.DatabaseName);
-
-        var stateCollection = myDb.GetCollection<State>(dbConfig.Value.StateCollectionName);
+        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
 
         var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
 
