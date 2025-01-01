@@ -1,6 +1,10 @@
 using System.Net;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using service_1.Database;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace service_1.Endpoints;
 
@@ -11,9 +15,20 @@ internal static class ServerInfoEndpoint
         return app.MapGet("/request", GetServerInfoHandler);
     }
 
-    public static async Task<IResult> GetServerInfoHandler(IHttpClientFactory httpClientFactory,
+    public static async Task<IResult> GetServerInfoHandler(
+        [FromServices] IOptions<DbConfig> dbConfig,
+        IHttpClientFactory httpClientFactory,
         ILogger<Program> logger)
     {
+        var stateCollection = dbConfig.Value.GetStateCollectionFromDb();
+        
+        var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync();
+        
+        if (currentState.CurrentAppState == AppState.PAUSED)
+        {
+            return Results.Problem(statusCode: 503);
+        }
+
         using var httpClient = httpClientFactory.CreateClient();
 
         SystemInformation systemInfo1 = Utils.ExtractSystemInfo();
