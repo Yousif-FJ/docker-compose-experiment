@@ -30,6 +30,11 @@ internal static class LoginEndpoint
             await stateCollection.InsertOneAsync(currentStateEntry);
         }
 
+        if (currentStateEntry.CurrentAppState == AppState.PAUSED)
+        {
+            return Results.Text("Service is PAUSED",statusCode: 503);
+        }
+
         if (currentStateEntry.CurrentAppState == AppState.RUNNING)
         {
             return Results.Ok();
