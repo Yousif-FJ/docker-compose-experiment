@@ -25,9 +25,9 @@ internal static class ServerInfoEndpoint
         var currentState = await stateCollection.Find(_ => true).FirstOrDefaultAsync()??
             new State{ CurrentAppState = AppState.INIT};
         
-        if (currentState.CurrentAppState == AppState.PAUSED)
+        if (currentState.CurrentAppState != AppState.RUNNING)
         {
-            return Results.Text("Service is PAUSED",statusCode: 503);
+            return Results.Text("Service is not in the RUNNING state",statusCode: 503);
         }
 
         using var httpClient = httpClientFactory.CreateClient();
