@@ -1,4 +1,4 @@
-name: devops-compose-experiment
+name: devops-project
 services:
   nginx:
     build:
